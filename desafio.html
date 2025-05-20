@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Desafío Diario - Truco Aleatorio y Grabación</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --card: #1a1a1a;
+      --primary: #56ccf2;
+      --accent: #ffffffcc;
+      --btn-bg: #56ccf2;
+      --btn-disabled-bg: #2a5d8f;
+    }
+
+    .logo {
+      max-width: 300px; /* Tamaño grande para que se note bien */
+      margin-bottom: 2rem;
+      filter: brightness(1.2) contrast(1.1);
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--accent);
+      font-family: 'Orbitron', sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0 1rem;
+      text-align: center;
+    }
+
+    .container {
+      background: var(--card);
+      border: 3px solid var(--primary);
+      border-radius: 14px;
+      padding: 2rem 2.5rem;
+      max-width: 400px;
+      box-shadow: 0 0 12px var(--primary);
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      color: var(--primary);
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      user-select: none;
+    }
+
+    .trick-name {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 1.3rem 0 0.8rem;
+      color: var(--primary);
+      user-select: text;
+    }
+
+    .description {
+      font-size: 1rem;
+      line-height: 1.4;
+      color: var(--accent);
+      user-select: text;
+    }
+
+    video {
+      border-radius: 12px;
+      background: black;
+      max-width: 100%;
+      height: auto;
+      margin-top: 1rem;
+      box-shadow: 0 0 10px var(--primary);
+    }
+
+    button {
+      background: var(--btn-bg);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      font-size: 1.1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    button:disabled {
+      background: var(--btn-disabled-bg);
+      cursor: default;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <img src="Logo.png" alt="Logo Trukz" class="logo" />
+    <h1>Truco Aleatorio</h1>
+    <div class="trick-name" id="trickName">Cargando...</div>
+    <div class="description" id="trickDesc">Espera un momento...</div>
+  </div>
+
+  <video id="preview" autoplay muted></video>
+
+  <button id="recordBtn">Grabar</button>
+
+  <script>
+    const tricks = [
+      { name: "Ollie", desc: "Salta con la tabla sin usar las manos, levantando el nose y tail con un movimiento rápido del pie trasero." },
+      { name: "Shuvit", desc: "Gira la tabla 180° debajo de ti sin que tu cuerpo gire." },
+      { name: "Manual", desc: "Equilibra la tabla sobre las ruedas traseras mientras avanzas." },
+      { name: "Kickflip", desc: "Haz que la tabla gire horizontalmente hacia adelante con un giro del pie delantero." },
+      { name: "Heelflip", desc: "Similar al kickflip, pero girando la tabla con el talón del pie delantero." },
+      { name: "Varial Flip", desc: "Combina un shuvit y un kickflip al mismo tiempo." },
+      { name: "360 Flip", desc: "Un flip que combina un kickflip con un giro de 360° de la tabla." },
+      { name: "Laser Flip", desc: "Una combinación de un heelflip con un shuvit de 360°." },
+      { name: "Impossible", desc: "La tabla envuelve el pie trasero en un giro vertical, como una especie de loop." },
+      { name: "Pop Shuvit", desc: "Un shuvit con un pop fuerte, haciendo que la tabla salte y gire." },
+      { name: "Nollie", desc: "Ollie pero impulsado con el pie delantero, desde el nose de la tabla." },
+      { name: "Fakie Ollie", desc: "Ollie realizado andando hacia atrás." },
+      { name: "Nose Manual", desc: "Equilibra la tabla solo en las ruedas delanteras mientras avanzas." },
+      { name: "Blunt Slide", desc: "Desliza la parte trasera de la tabla en un borde o baranda." },
+      { name: "Boardslide", desc: "Desliza la tabla lateralmente sobre un borde o baranda." },
+      { name: "Smith Grind", desc: "Grind donde la parte trasera de la tabla toca la baranda mientras el nose está levantado." },
+      { name: "Feeble Grind", desc: "Grind con la parte trasera de la tabla en la baranda y el cuerpo girado hacia el lado contrario." },
+      { name: "Crooked Grind", desc: "Grind con el nose de la tabla sobre la baranda y las ruedas traseras levantadas." },
+      { name: "Nose Slide", desc: "Desliza la tabla con el nose sobre la baranda o borde." },
+      { name: "Half Cab", desc: "Giro de 180° con el cuerpo y la tabla en fakie, terminando en switch." },
+      { name: "Bigspin", desc: "Giro de 360° de la tabla con un giro de 180° del cuerpo." },
+      { name: "Fingerflip", desc: "Haz que la tabla gire con el dedo mientras está en el aire." },
+      { name: "Darkslide", desc: "Desliza la tabla con las ruedas hacia arriba sobre un borde." },
+      { name: "No Comply", desc: "Impúlsate con el pie delantero mientras levantas el pie trasero para hacer que la tabla salte." },
+      { name: "Wallride", desc: "Camina con la tabla por una pared, apoyando las ruedas." },
+      { name: "Casper Flip", desc: "Voltea la tabla en el aire con un flip combinado y atrápala con los pies en posición invertida." },
+      { name: "Late Flip", desc: "Haz un flip después de despegar del suelo, con un ligero retraso." },
+      { name: "Flip Manual", desc: "Combina un flip con un manual para mantener el equilibrio." },
+      { name: "Hardflip", desc: "Un flip que combina un frontside shove-it con un kickflip." },
+      { name: "Inward Heelflip", desc: "Un heelflip combinado con un backside shove-it." },
+      { name: "Pressure Flip", desc: "Usa presión del pie para hacer girar la tabla sin despegarla." },
+      { name: "Double Flip", desc: "Haz que la tabla gire dos veces en el aire." },
+      { name: "Impossible Late", desc: "Un impossible con retraso en el flip." },
+      { name: "Bigspin Flip", desc: "Un bigspin combinado con un kickflip." },
+      { name: "Varial Heelflip", desc: "Combina un shuvit con un heelflip." },
+      { name: "No Slide", desc: "Un deslizamiento sin tocar la tabla con las manos." },
+      { name: "Darkflip", desc: "Un darkslide combinado con un flip." },
+      { name: "Kickflip Underflip", desc: "Haz un kickflip y luego gira la tabla en sentido contrario con el pie delantero." },
+      { name: "Nose Grind", desc: "Grind con la parte delantera de la tabla sobre la baranda." },
+      { name: "Revert", desc: "Gira 180° sobre el eje vertical al aterrizar." },
+      { name: "Switch Ollie", desc: "Ollie realizado en posición switch (inversa)." },
+      { name: "Switch Kickflip", desc: "Kickflip en posición switch." },
+      { name: "Switch Heelflip", desc: "Heelflip en posición switch." },
+      { name: "Switch Manual", desc: "Manual realizado en switch." },
+      { name: "Switch 360 Flip", desc: "360 flip en switch." },
+      { name: "Switch Hardflip", desc: "Hardflip en switch." }
+    ];
+
+    // Mostrar truco random
+    function randomTrick() {
+      const idx = Math.floor(Math.random() * tricks.length);
+      return tricks[idx];
+    }
+
+    function showTrick() {
+      const trick = randomTrick();
+      document.getElementById('trickName').textContent = trick.name;
+      document.getElementById('trickDesc').textContent = trick.desc;
+    }
+
+    // Variables para grabación
+    let mediaRecorder;
+    let recordedChunks = [];
+    let isRecording = false;
+
+    const recordBtn = document.getElementById('recordBtn');
+    const preview = document.getElementById('preview');
+
+    async function initCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        preview.srcObject = stream;
+
+        mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable = e => {
+          if (e.data.size > 0) recordedChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(recordedChunks, { type: 'video/webm' });
+          recordedChunks = [];
+          const url = URL.createObjectURL(blob);
+
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = url;
+          a.download = 'mi_truco_skate.webm';
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+
+          recordBtn.textContent = 'Grabación finalizada';
+          recordBtn.disabled = true;
+        };
+
+      } catch (err) {
+        alert('No se pudo acceder a la cámara/micrófono. Checa permisos.');
+        recordBtn.disabled = true;
+      }
+    }
+
+    recordBtn.onclick = () => {
+      if (!isRecording) {
+        mediaRecorder.start();
+        isRecording = true;
+        recordBtn.textContent = 'Detener Grabación';
+      } else {
+        mediaRecorder.stop();
+        isRecording = false;
+      }
+    };
+
+    window.onload = () => {
+      showTrick();
+      initCamera();
+    };
+  </script>
+</body>
+</html>

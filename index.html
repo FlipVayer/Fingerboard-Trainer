@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Subgrip Trainer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --card: #1a1a1a;
+      --border: #2a2a2a;
+      --primary: #56ccf2;
+      --accent: #ffffffcc;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background-color: var(--bg);
+      color: var(--accent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem;
+      min-height: 100vh;
+    }
+
+    .logo {
+  max-width: 300px; /* Antes 180px */
+  margin-bottom: 2rem;
+  filter: brightness(1.2) contrast(1.1);
+}
+
+
+    h1 {
+      font-size: 3.5rem;
+      color: var(--primary);
+      margin-bottom: 2rem;
+    }
+
+    select, button {
+      background-color: var(--card);
+      color: var(--accent);
+      border: 2px solid var(--primary);
+      padding: 1rem 1.5rem;
+      margin: 0.8rem;
+      border-radius: 10px;
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    select:hover, button:hover {
+      border-color: #77e0f7;
+      background-color: #1f1f1f;
+    }
+
+    .timer {
+      font-size: 4rem;
+      margin: 2rem 0;
+      color: var(--primary);
+    }
+
+    .counter, .log {
+      font-size: 1.4rem;
+      margin: 1rem 0;
+      color: #bbb;
+    }
+
+    .routine-container {
+      margin-top: 2.5rem;
+      width: 100%;
+      max-width: 1000px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .trick-card {
+      background-color: var(--card);
+      border: 2px solid var(--border);
+      padding: 1.5rem;
+      border-radius: 12px;
+      text-align: center;
+      transition: 0.3s;
+    }
+
+    .trick-card:hover {
+      border-color: var(--primary);
+    }
+
+    .trick-card.done {
+      background-color: #202020;
+      border-color: #4caf50;
+    }
+
+    .trick-name {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+    }
+
+    .trick-time {
+      font-size: 1.2rem;
+      color: #aaa;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      h1 {
+        font-size: 2.2rem;
+      }
+      .timer {
+        font-size: 2.5rem;
+      }
+      .routine-container {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- LOGO -->
+  <img src="logo.png" alt="Logo Trukz" class="logo" />
+
+  <h1>Subgrip Fingerboard Trainer</h1>
+
+  <label for="routine" style="font-size: 1.3rem;">Selecciona una rutina:</label>
+  <select id="routine">
+    <option value="easy">Fácil</option>
+    <option value="medium">Media</option>
+    <option value="hard">Difícil</option>
+  </select>
+
+  <div class="timer" id="timer">00:00</div>
+  <div>
+    <button id="startBtn">Iniciar</button>
+    <button id="resetBtn">Reiniciar</button>
+    <button id="challengeBtn">Ir a Desafío</button>
+  </div>
+
+  <div class="counter">Trucos realizados: <span id="trickCount">0</span></div>
+  <div class="log">Presiona la tecla ESPACIO para marcar el truco realizado</div>
+
+  <div class="routine-container" id="trickList"></div>
+
+  <script>
+    const routines = {
+      easy: ["Ollie", "Shuvit", "Manual"],
+      medium: ["Kickflip", "Heelflip", "Varial Flip"],
+      hard: ["360 Flip", "Laser Flip", "Impossible"]
+    };
+
+    const timerEl = document.getElementById('timer');
+    const trickCountEl = document.getElementById('trickCount');
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const trickListEl = document.getElementById('trickList');
+    const routineSelect = document.getElementById('routine');
+    const challengeBtn = document.getElementById('challengeBtn');
+
+    let interval, startTime, running = false, trickCount = 0;
+    let currentRoutine = [], trickIndex = 0;
+
+    function formatTime(ms) {
+      let totalSeconds = Math.floor(ms / 1000);
+      let minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+      let seconds = String(totalSeconds % 60).padStart(2, '0');
+      return `${minutes}:${seconds}`;
+    }
+
+    function loadRoutine(name) {
+      trickListEl.innerHTML = "";
+      currentRoutine = routines[name];
+      trickIndex = 0;
+      currentRoutine.forEach((trick, index) => {
+        const card = document.createElement("div");
+        card.className = "trick-card";
+        card.id = `trick-${index}`;
+        card.innerHTML = `
+          <div class="trick-name">${trick}</div>
+          <div class="trick-time" id="time-${index}">00:00</div>`;
+        trickListEl.appendChild(card);
+      });
+    }
+
+    function startTimer() {
+      if (!running) {
+        startTime = Date.now();
+        interval = setInterval(() => {
+          let elapsed = Date.now() - startTime;
+          timerEl.textContent = formatTime(elapsed);
+        }, 500);
+        running = true;
+      }
+    }
+
+    function resetAll() {
+      clearInterval(interval);
+      timerEl.textContent = "00:00";
+      trickCount = 0;
+      trickIndex = 0;
+      running = false;
+      trickCountEl.textContent = "0";
+      loadRoutine(routineSelect.value);
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && running && trickIndex < currentRoutine.length) {
+        let elapsed = Date.now() - startTime;
+        let card = document.getElementById(`trick-${trickIndex}`);
+        let timeLabel = document.getElementById(`time-${trickIndex}`);
+        card.classList.add("done");
+        timeLabel.textContent = formatTime(elapsed);
+        trickIndex++;
+        trickCount++;
+        trickCountEl.textContent = trickCount;
+      }
+    });
+
+    startBtn.addEventListener('click', startTimer);
+    resetBtn.addEventListener('click', resetAll);
+    routineSelect.addEventListener('change', resetAll);
+
+    challengeBtn.addEventListener('click', () => {
+      window.location.href = 'http://127.0.0.1:5500/desafio.html';
+    });
+
+    loadRoutine(routineSelect.value);
+  </script>
+</body>
+</html>
