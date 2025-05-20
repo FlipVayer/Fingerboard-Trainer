@@ -32,11 +32,10 @@
     }
 
     .logo {
-  max-width: 300px; /* Antes 180px */
-  margin-bottom: 2rem;
-  filter: brightness(1.2) contrast(1.1);
-}
-
+      max-width: 300px; /* Antes 180px */
+      margin-bottom: 2rem;
+      filter: brightness(1.2) contrast(1.1);
+    }
 
     h1 {
       font-size: 3.5rem;
@@ -129,7 +128,7 @@
 </head>
 <body>
   <!-- LOGO -->
-  <img src="logo.png" alt="Logo Trukz" class="logo" />
+  <img src="Logo.png" alt="Logo Trukz" class="logo" />
 
   <h1>Subgrip Fingerboard Trainer</h1>
 
@@ -231,7 +230,8 @@
     routineSelect.addEventListener('change', resetAll);
 
     challengeBtn.addEventListener('click', () => {
-      window.location.href = 'http://127.0.0.1:5500/desafio.html';
+      // Cambié la url para que sea relativa y funcione en GitHub Pages o cualquier hosting
+      window.location.href = 'desafio.html';
     });
 
     loadRoutine(routineSelect.value);
