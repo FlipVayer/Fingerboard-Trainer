@@ -32,7 +32,7 @@
     }
 
     .logo {
-      max-width: 300px; /* Antes 180px */
+      max-width: 300px;
       margin-bottom: 2rem;
       filter: brightness(1.2) contrast(1.1);
     }
@@ -41,6 +41,7 @@
       font-size: 3.5rem;
       color: var(--primary);
       margin-bottom: 2rem;
+      text-align: center;
     }
 
     select, button {
@@ -147,7 +148,12 @@
   </div>
 
   <div class="counter">Trucos realizados: <span id="trickCount">0</span></div>
-  <div class="log">Presiona la tecla ESPACIO para marcar el truco realizado</div>
+  <div class="log">Presiona la tecla ESPACIO o el botón de abajo para marcar el truco realizado</div>
+
+  <!-- BOTÓN PARA MARCAR TRUCO -->
+  <div>
+    <button id="markBtn">Marcar Truco</button>
+  </div>
 
   <div class="routine-container" id="trickList"></div>
 
@@ -165,6 +171,7 @@
     const trickListEl = document.getElementById('trickList');
     const routineSelect = document.getElementById('routine');
     const challengeBtn = document.getElementById('challengeBtn');
+    const markBtn = document.getElementById('markBtn');
 
     let interval, startTime, running = false, trickCount = 0;
     let currentRoutine = [], trickIndex = 0;
@@ -212,8 +219,8 @@
       loadRoutine(routineSelect.value);
     }
 
-    window.addEventListener('keydown', (e) => {
-      if (e.code === 'Space' && running && trickIndex < currentRoutine.length) {
+    function marcarTruco() {
+      if (running && trickIndex < currentRoutine.length) {
         let elapsed = Date.now() - startTime;
         let card = document.getElementById(`trick-${trickIndex}`);
         let timeLabel = document.getElementById(`time-${trickIndex}`);
@@ -223,17 +230,28 @@
         trickCount++;
         trickCountEl.textContent = trickCount;
       }
+    }
+
+    // Evento de teclado (Espacio)
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        marcarTruco();
+      }
     });
 
+    // Botones
     startBtn.addEventListener('click', startTimer);
     resetBtn.addEventListener('click', resetAll);
+    markBtn.addEventListener('click', marcarTruco);
+
     routineSelect.addEventListener('change', resetAll);
 
     challengeBtn.addEventListener('click', () => {
-      // Cambié la url para que sea relativa y funcione en GitHub Pages o cualquier hosting
       window.location.href = 'desafio.html';
     });
 
+    // Cargar rutina al inicio
     loadRoutine(routineSelect.value);
   </script>
 </body>
