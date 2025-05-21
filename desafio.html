@@ -16,7 +16,7 @@
     }
 
     .logo {
-      max-width: 300px; /* Tamaño grande para que se note bien */
+      max-width: 300px;
       margin-bottom: 2rem;
       filter: brightness(1.2) contrast(1.1);
       display: block;
@@ -108,11 +108,10 @@
   </div>
 
   <video id="preview" autoplay muted></video>
-
   <button id="recordBtn">Grabar</button>
 
   <script>
-    const tricks = [
+    const tricks = [/*     const tricks = [
       { name: "Ollie", desc: "Salta con la tabla sin usar las manos, levantando el nose y tail con un movimiento rápido del pie trasero." },
       { name: "Shuvit", desc: "Gira la tabla 180° debajo de ti sin que tu cuerpo gire." },
       { name: "Manual", desc: "Equilibra la tabla sobre las ruedas traseras mientras avanzas." },
@@ -159,9 +158,8 @@
       { name: "Switch Manual", desc: "Manual realizado en switch." },
       { name: "Switch 360 Flip", desc: "360 flip en switch." },
       { name: "Switch Hardflip", desc: "Hardflip en switch." }
-    ];
+    ]; */];
 
-    // Mostrar truco random
     function randomTrick() {
       const idx = Math.floor(Math.random() * tricks.length);
       return tricks[idx];
@@ -173,7 +171,6 @@
       document.getElementById('trickDesc').textContent = trick.desc;
     }
 
-    // Variables para grabación
     let mediaRecorder;
     let recordedChunks = [];
     let isRecording = false;
@@ -183,7 +180,10 @@
 
     async function initCamera() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { exact: "environment" } },
+          audio: true
+        });
         preview.srcObject = stream;
 
         mediaRecorder = new MediaRecorder(stream);
@@ -211,7 +211,7 @@
         };
 
       } catch (err) {
-        alert('No se pudo acceder a la cámara/micrófono. Checa permisos.');
+        alert('No se pudo acceder a la cámara trasera. Prueba en un dispositivo móvil o revisa permisos.');
         recordBtn.disabled = true;
       }
     }
